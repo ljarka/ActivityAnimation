@@ -16,150 +16,63 @@
 
 package com.brucetoo.activityanimation;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.ImageView;
+import android.support.v7.app.AppCompatActivity;
 
-import com.brucetoo.activityanimation.widget.ImageInfo;
-import com.brucetoo.activityanimation.widget.PhotoView;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.brucetoo.activityanimation.fullscreen.FullScreenFragmentUtil;
+import com.brucetoo.activityanimation.fullscreen.FullScreenGalleryFragment;
+import com.brucetoo.activityanimation.small.SmallGalleryView;
 
 import java.util.ArrayList;
 
-/**
- * Created by Bruce Too
- * On 9/28/15.
- * At 10:16
- */
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends AppCompatActivity {
 
-    private GridView gridView;
     private ArrayList<String> imgList = new ArrayList<>();
-    private ArrayList<ImageInfo> imgImageInfos = new ArrayList<>();
+    private SmallGalleryView smallGalleryView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        http://img6.cache.netease.com/3g/2015/9/30/20150930091938133ad.jpg
-//        http://img2.cache.netease.com/3g/2015/9/30/2015093000515435aff.jpg
-//        http://img5.cache.netease.com/3g/2015/9/30/20150930075225737e5.jpg
-//        http://img5.cache.netease.com/3g/2015/9/29/20150929213007cd8cd.jpg
-//        http://img3.cache.netease.com/3g/2015/9/29/20150929162747a8bfa.jpg
-//        http://img2.cache.netease.com/3g/2015/9/30/20150930091208cf03c.jpg
-        imgList.add(0, "http://img6.cache.netease.com/3g/2015/9/30/20150930091938133ad.jpg");
-        imgList.add(1, "http://img2.cache.netease.com/3g/2015/9/30/2015093000515435aff.jpg");
-        imgList.add(2, "http://img5.cache.netease.com/3g/2015/9/30/20150930075225737e5.jpg");
-        imgList.add(3, "http://img5.cache.netease.com/3g/2015/9/29/20150929213007cd8cd.jpg");
-        imgList.add(4, "http://img3.cache.netease.com/3g/2015/9/29/20150929162747a8bfa.jpg");
-        imgList.add(5, "http://img2.cache.netease.com/3g/2015/9/30/20150930091208cf03c.jpg");
-        imgList.add(6, "http://img2.cache.netease.com/3g/2015/9/30/2015093000515435aff.jpg");
-        imgList.add(7, "http://img5.cache.netease.com/3g/2015/9/29/20150929213007cd8cd.jpg");
-        imgList.add(8, "http://img3.cache.netease.com/3g/2015/9/29/20150929162747a8bfa.jpg");
-        gridView = (GridView) findViewById(R.id.gridview);
-        final ImageAdapter adapter = new ImageAdapter();
-        gridView.setAdapter(adapter);
+        imgList.add(0, "http://www.hdwallpapery.com/static/images/free-wallpaper-download1_YGS0iqi.jpg");
+        imgList.add(1, "http://www.hdwallpapery.com/static/images/free-wallpaper-3_RctdU7Y.jpg");
+        imgList.add(2, "http://www.hdwallpapery.com/static/images/814410-free-wallpaper.jpg");
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(view.isEnabled()) {
-                    Bundle bundle = new Bundle();
-                    bundle.putStringArrayList("imgs", imgList);
-                    bundle.putParcelable("info", ((PhotoView) view).getInfo());
-                    bundle.putInt("position", position);
-                    imgImageInfos.clear();
-                    //NOTE:if imgList.size >= the visible count in single screen,i will cause NullPointException
-                    //because item out of screen have been replaced/reused
-                    for (int i = 0; i < imgList.size(); i++) {
-                        imgImageInfos.add(((PhotoView) parent.getChildAt(i)).getInfo());
-                    }
-                    parent.getChildAt(position);
-                    bundle.putParcelableArrayList("infos", imgImageInfos);
-                    getSupportFragmentManager().beginTransaction().replace(Window.ID_ANDROID_CONTENT, ViewPagerFragment.getInstance(bundle), "ViewPagerFragment")
-                            .addToBackStack(null).commit();
-                }
+        smallGalleryView = (SmallGalleryView) findViewById(R.id.small_gallery_view);
+        smallGalleryView.setImages(imgList);
+        setupGalleriesInteraction();
+    }
 
-            }
+    private void setupGalleriesInteraction() {
+        smallGalleryView.setOnItemClickListener((currentItemPosition, currentItemImageInfo) -> {
+
+            FullScreenGalleryFragment fullScreenGallery = FullScreenGalleryFragment
+                    .getInstance(imgList, currentItemImageInfo,
+                            currentItemPosition);
+            fullScreenGallery.setSmallGallery(smallGalleryView);
+            FullScreenFragmentUtil.showFullScreenFragment(MainActivity.this, fullScreenGallery, FullScreenGalleryFragment.TAG);
         });
+
+        setupExistingFullScreenGalleryFragment();
     }
 
+    private void setupExistingFullScreenGalleryFragment() {
+        FullScreenGalleryFragment fullScreenGallery = (FullScreenGalleryFragment) getSupportFragmentManager()
+                .findFragmentByTag(FullScreenGalleryFragment.TAG);
 
-    class ImageAdapter extends BaseAdapter {
-
-        @Override
-        public int getCount() {
-            return imgList.size();
+        if (fullScreenGallery != null) {
+            fullScreenGallery.setSmallGallery(smallGalleryView);
+            smallGalleryView.hideAllImages();
         }
-
-        @Override
-        public Object getItem(int i) {
-            return i;
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            PhotoView p = new PhotoView(MainActivity.this);
-            p.setLayoutParams(new AbsListView.LayoutParams((int) (getResources().getDisplayMetrics().density * 100), (int) (getResources().getDisplayMetrics().density * 100)));
-            p.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
-            p.setEnabled(false);
-
-            //get thumbnailurl to save user data...like WeChat does
-            String thumbnailUrl = getThumbnailImageUrl(imgList.get(i),0,0);
-            ImageLoader.getInstance().displayImage(thumbnailUrl, p,
-                    new DisplayImageOptions.Builder()
-                            .showImageOnLoading(android.R.color.darker_gray)
-                            .cacheInMemory(true).cacheOnDisk(true).build(), loadingListener);
-            p.touchEnable(false);//disable touch
-            return p;
-        }
-    }
-
-    private ImageLoadingListener loadingListener = new SimpleImageLoadingListener() {
-        @Override
-        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-            view.setEnabled(true);//only loadedImage is available we can click item
-        }
-    };
-
-    /**
-     * get a thumbnail image url from original url
-     * @param imgUrl original image url
-     * @param width  width u need
-     * @param height height u need
-     * @return the number(85) in below url indicate the quality of original image
-     */
-    public String getThumbnailImageUrl(String imgUrl,int width,int height){
-        String url="http://imgsize.ph.126.net/?imgurl=data1_data2xdata3x0x85.jpg&enlarge=true";
-        width = (int) (getResources().getDisplayMetrics().density * 100);
-        height = (int) (getResources().getDisplayMetrics().density * 100); //just for convenient
-        url=url.replaceAll("data1", imgUrl).replaceAll("data2", width+"").replaceAll("data3", height+"");
-        return url;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //just for test to clean cache
-        ImageLoader.getInstance().clearMemoryCache();
-        ImageLoader.getInstance().clearDiskCache();
+
+        FullScreenGalleryFragment fullScreenGallery = (FullScreenGalleryFragment) getSupportFragmentManager()
+                .findFragmentByTag(FullScreenGalleryFragment.TAG);
+        fullScreenGallery.setSmallGallery(null);
     }
 }

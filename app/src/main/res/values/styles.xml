@@ -14,27 +14,27 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    -->
-    <style name="AppBaseTheme" parent="android:Theme.Holo.Light">
-        <!--
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        -->
-    </style>
-
     <!-- Application theme. -->
-    <style name="AppTheme" parent="AppBaseTheme">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowNoTitle">true</item>
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
     <style name="Transparent">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="GalleryUnderlinePagerIndicator">
+        <item name="fillColor">@android:color/holo_blue_light</item>
+        <item name="strokeColor">@android:color/white</item>
+        <item name="pageColor">@android:color/darker_gray</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="radius">6dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <!--dummy padding to fix indicator clipping-->
     </style>
 </resources>
